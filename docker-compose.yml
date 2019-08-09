@@ -25,7 +25,8 @@ services:
     expose:
       - 9000
     volumes:
-      - database:/www
+      # - database:/www
+      - ./docroot:/www
     environment:
       PHP_MEMORY_LIMIT:    512M
       MAX_UPLOAD:          50M
@@ -33,5 +34,5 @@ services:
       PHP_MAX_POST:        100M
       GROCY_CULTURE: en
     container_name: grocy
-volumes:
-  database:
+# volumes:
+#   database:
