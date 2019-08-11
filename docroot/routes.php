@@ -41,6 +41,7 @@ $app->group('', function()
 		$this->get('/productgroups', '\Grocy\Controllers\StockController:ProductGroupsList');
 		$this->get('/productgroup/{productGroupId}', '\Grocy\Controllers\StockController:ProductGroupEditForm');
 		$this->get('/stockjournal', '\Grocy\Controllers\StockController:Journal');
+		$this->get('/locationcontentsheet', '\Grocy\Controllers\StockController:LocationContentSheet');
 	}
 
 	// Shopping list routes
@@ -124,6 +125,7 @@ $app->group('/api', function()
 	// Generic entity interaction
 	$this->get('/objects/{entity}', '\Grocy\Controllers\GenericEntityApiController:GetObjects');
 	$this->get('/objects/{entity}/{objectId}', '\Grocy\Controllers\GenericEntityApiController:GetObject');
+	$this->get('/objects/{entity}/search/{searchString}', '\Grocy\Controllers\GenericEntityApiController:SearchObjects');
 	$this->post('/objects/{entity}', '\Grocy\Controllers\GenericEntityApiController:AddObject');
 	$this->put('/objects/{entity}/{objectId}', '\Grocy\Controllers\GenericEntityApiController:EditObject');
 	$this->delete('/objects/{entity}/{objectId}', '\Grocy\Controllers\GenericEntityApiController:DeleteObject');
@@ -167,6 +169,7 @@ $app->group('/api', function()
 	{
 		$this->post('/stock/shoppinglist/add-missing-products', '\Grocy\Controllers\StockApiController:AddMissingProductsToShoppingList');
 		$this->post('/stock/shoppinglist/clear', '\Grocy\Controllers\StockApiController:ClearShoppingList');
+		$this->post('/stock/shoppinglist/remove-product', '\Grocy\Controllers\StockApiController:RemoveItemFromShoppingList');
 	}
 
 	// Recipes

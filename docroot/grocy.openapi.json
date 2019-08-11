@@ -2,7 +2,7 @@
 	"openapi": "3.0.0",
 	"info": {
 		"title": "grocy REST API",
-		"description": "Authentication is done via API keys (header *GROCY-API-KEY*), which you can manage [here](PlaceHolderManageApiKeysUrl).<br>Additionally requests from within the frontend are also valid (via session cookie).",
+		"description": "Authentication is done via API keys (header *GROCY-API-KEY* or same named query parameter), which you can manage [here](PlaceHolderManageApiKeysUrl).<br>Additionally requests from within the frontend are also valid (via session cookie).",
 		"version": "xxx",
 		"contact": {
 			"email": "bernd@berrnd.de"
@@ -438,6 +438,81 @@
 				"responses": {
 					"204": {
 						"description": "The operation was successful"
+					},
+					"400": {
+						"description": "The operation was not successful",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GenericErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/objects/{entity}/search/{searchString}": {
+			"get": {
+				"summary": "Returns all objects of the given entity where the field \"name\" contains the search string (so only works for entities which have that field)",
+				"tags": [
+					"Generic entity interactions"
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entity",
+						"required": true,
+						"description": "A valid entity name",
+						"schema": {
+							"$ref": "#/components/internalSchemas/ExposedEntity"
+						}
+					},
+					{
+						"in": "path",
+						"name": "searchString",
+						"required": true,
+						"description": "The search string",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "An entity object",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"oneOf": [
+											{
+												"$ref": "#/components/schemas/Product"
+											},
+											{
+												"$ref": "#/components/schemas/Chore"
+											},
+											{
+												"$ref": "#/components/schemas/Battery"
+											},
+											{
+												"$ref": "#/components/schemas/Location"
+											},
+											{
+												"$ref": "#/components/schemas/QuantityUnit"
+											},
+											{
+												"$ref": "#/components/schemas/ShoppingListItem"
+											},
+											{
+												"$ref": "#/components/schemas/StockEntry"
+											}
+										]
+									}
+								}
+							}
+						}
 					},
 					"400": {
 						"description": "The operation was not successful",
@@ -1523,6 +1598,58 @@
 					},
 					"400": {
 						"description": "The operation was not successful (possible errors are: Not existing shopping list)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GenericErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/stock/shoppinglist/remove-product": {
+			"post": {
+				"summary": "Removes the given product from the given shopping list, if it is on it",
+				"tags": [
+					"Stock"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"product_id": {
+										"type": "integer",
+										"description": "A valid product id of the item on the shopping list"
+									},
+									"list_id": {
+										"type": "integer",
+										"description": "A valid shopping list id, when omitted, the default shopping list (with id 1) is used"
+									},
+									"product_amount": {
+										"type": "integer",
+										"description": "The amount of product units to remove, when omitted, the default amount of 1 is used"
+									}
+								},
+								"example": {
+									"product_id": 3,
+									"list_id": 2,
+									"product_amount": 5
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"204": {
+						"description": "The operation was successful"
+					},
+					"400": {
+						"description": "The operation was not successful (possible errors are: Not existing shopping list, Invalid product id supplied)",
 						"content": {
 							"application/json": {
 								"schema": {

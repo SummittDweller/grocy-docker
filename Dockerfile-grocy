@@ -1,8 +1,9 @@
 FROM php:7.2-fpm-alpine
 MAINTAINER Talmai Oliveira <to@talm.ai>
 
-ENV REFRESHED_AT  2019-7-07
-ENV GROCY_VERSION 2.4.4
+ENV REFRESHED_AT  2019-8-10
+#ENV GROCY_VERSION v2.4.4
+ENV GROCY_VERSION master
 
 RUN     apk update && \
         apk upgrade && \
@@ -24,10 +25,13 @@ RUN     apk update && \
         wget https://getcomposer.org/installer -O - -q | php -- --quiet && \
         mkdir -p /tmp/download && \
         cd /tmp/download && \
-        wget -t 3 -T 30 -nv -O "grocy.zip" "https://github.com/grocy/grocy/archive/v${GROCY_VERSION}.zip" && \
+#        wget -t 3 -T 30 -nv -O "grocy.zip" "https://github.com/grocy/grocy/archive/v${GROCY_VERSION}.zip" && \
+        wget -t 3 -T 30 -nv -O "grocy.zip" "https://github.com/grocy/grocy/zipball/master" && \
+#        mkdir grocy-${GROCY_VERSION} && \
+#        unzip -d grocy-${GROCY_VERSION}/ grocy.zip && \
         unzip grocy.zip && \
         rm -f grocy.zip && \
-        cd grocy-${GROCY_VERSION} && \
+        cd grocy-grocy* && \
         mv public /www/public && \
         mv controllers /www/controllers && \
         mv data /www/data && \

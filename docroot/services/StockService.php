@@ -20,6 +20,12 @@ class StockService extends BaseService
 		return $this->DatabaseService->ExecuteDbQuery($sql)->fetchAll(\PDO::FETCH_OBJ);
 	}
 
+	public function GetCurrentStockLocationContent()
+	{
+		$sql = 'SELECT * FROM stock_current_location_content';
+		return $this->DatabaseService->ExecuteDbQuery($sql)->fetchAll(\PDO::FETCH_OBJ);
+	}
+
 	public function GetCurrentStockLocations()
 	{
 		$sql = 'SELECT * FROM stock_current_locations';
@@ -146,7 +152,7 @@ class StockService extends BaseService
 		}
 	}
 
-	public function AddProduct(int $productId, float $amount, string $bestBeforeDate, $transactionType, $purchasedDate, $price, $locationId = null)
+	public function AddProduct(int $productId, float $amount, $bestBeforeDate, $transactionType, $purchasedDate, $price, $locationId = null)
 	{
 		if (!$this->ProductExists($productId))
 		{
@@ -165,6 +171,23 @@ class StockService extends BaseService
 			}
 			
 			$amount = $amount - $productDetails->stock_amount - $productDetails->product->tare_weight;
+		}
+		
+		//Sets the default best before date, if none is supplied
+		if ($bestBeforeDate == null)
+		{
+			if (intval($productDetails->product->default_best_before_days) == -1)
+			{
+				$bestBeforeDate = date('2999-12-31');	
+			}
+			else if (intval($productDetails->product->default_best_before_days) > 0)
+			{
+				$bestBeforeDate = date('Y-m-d', strtotime(date('Y-m-d') . ' + '.$productDetails->product->default_best_before_days.' days'));	
+			}
+			else
+			{
+				$bestBeforeDate = date('Y-m-d');
+			}
 		}
 
 		if ($transactionType === self::TRANSACTION_TYPE_PURCHASE || $transactionType === self::TRANSACTION_TYPE_INVENTORY_CORRECTION)
@@ -303,7 +326,7 @@ class StockService extends BaseService
 		}
 	}
 
-	public function InventoryProduct(int $productId, int $newAmount, string $bestBeforeDate, $locationId = null, $price = null)
+	public function InventoryProduct(int $productId, int $newAmount, $bestBeforeDate, $locationId = null, $price = null)
 	{
 		if (!$this->ProductExists($productId))
 		{
@@ -494,6 +517,32 @@ class StockService extends BaseService
 		}
 
 		$this->Database->shopping_list()->where('shopping_list_id = :1', $listId)->delete();
+	}
+
+
+	public function RemoveProductFromShoppingList($productId, $amount = 1, $listId = 1)
+	{
+		if (!$this->ShoppingListExists($listId))
+		{
+			throw new \Exception('Shopping list does not exist');
+		}
+
+		$productRow = $this->Database->shopping_list()->where('product_id = :1', $productId)->fetch();
+
+		//If no entry was found with for this product, we return gracefully
+		if ($productRow != null && !empty($productRow))
+		{
+			$newAmount = $productRow->amount - $amount;
+			if ($newAmount < 1)
+			{
+				$productRow->delete();
+			}
+			else
+			{
+				$productRow->update(array('amount' => $newAmount));
+			}
+			
+		}
 	}
 
 	private function ProductExists($productId)
